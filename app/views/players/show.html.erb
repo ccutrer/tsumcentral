@@ -1,0 +1,24 @@
+<h1><%= @player.name %></h1>
+<% if @player.running? %>
+  <h2>Running</h2>
+    <p>For <%= distance_of_time_in_words(Time.zone.now - @player.runs.last.created_at) %></p>
+<% elsif @player.paused? %>
+  <h2>Paused</h2>
+  <%= link_to 'Extend Pause', pause_path(@player), method: :post %>
+  <%= link_to 'Unpause', unpause_path(@player), method: :delete %>
+<% else %>
+  <h2>Idle</h2>
+<% end %>
+<% unless @player.running? %>
+  <p>Next run: <%= @player.next_run %></p>
+<% end %>
+<% unless @player.paused? %>
+  <%= link_to 'Pause', pause_path(@player), method: :post %>
+<% end %>
+
+<h2>Prior Runs</h2>
+<ul>
+  <% @player.runs.reverse_order.not_running.limit(24).each do |run| %>
+    <li><%= run.created_at %> (<%= distance_of_time_in_words(run.runtime) %>): <%= run.summary %></li>
+  <% end %>
+</ul>
