@@ -9,10 +9,18 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin
-    redirect_to login_url unless admin?
+    unless admin?
+      respond_to do |format|
+        format.html { redirect_to login_url unless admin? }
+        format.json { render :unauthorized, json: {} }
+      end
+    end
   end
 
   def admin?
-    false
+    Rails.application.secrets[:shared_secret].present? && request.authorization &&
+      (auth_parts = request.authorization.split(' ', 2)) &&
+      auth_parts[0] == 'Bearer' &&
+      auth_parts[1] == Rails.application.secrets[:shared_secret]
   end
 end
