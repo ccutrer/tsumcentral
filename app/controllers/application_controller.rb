@@ -3,10 +3,17 @@ class ApplicationController < ActionController::Base
 
   def require_user_or_admin
     return if admin?
-    return redirect_to login_url unless session[:player_id]
-    @current_user = Player.find(session[:player_id])
-    redirect_to login_url unless @current_user
+    require_user
   end
+
+  def require_user
+    redirect_to login_url unless current_user
+  end
+
+  def current_user
+    @current_user ||= session[:player_id] && Player.find(session[:player_id])
+  end
+  helper_method :current_user
 
   def require_admin
     unless admin?

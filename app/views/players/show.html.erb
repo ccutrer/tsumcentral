@@ -22,3 +22,8 @@
     <li><%= run.created_at %> (<%= distance_of_time_in_words(run.runtime) %>): <%= run.summary %></li>
   <% end %>
 </ul>
+
+<% if @player == current_user %>
+<%= link_to 'Change Password', change_password_path %>
+<%= link_to 'Log Out', login_path, method: :delete %>
+<% end %>

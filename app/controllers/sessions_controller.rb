@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  before_action :require_user, only: [:change_password]
+
   def new
   end
 
@@ -17,5 +19,18 @@ class SessionsController < ApplicationController
     session.clear
 
     redirect_to login_path
+  end
+
+  def change_password
+    return if request.method == 'GET'
+
+    if params[:password].blank? || params[:password] != params[:password_confirmation]
+      flash[:error] = "Passwords don't match"
+      return redirect_to change_password_url
+    end
+
+    current_user.update_attribute(:password, params[:password])
+
+    redirect_to player_path(current_user)
   end
 end

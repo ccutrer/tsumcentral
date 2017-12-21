@@ -7,7 +7,9 @@ Rails.application.routes.draw do
 
   get '/login' => 'sessions#new'
   post '/login' => 'sessions#create'
-  get '/logout' => 'sessions#destroy'
+  delete '/login' => 'sessions#destroy'
+  get '/change_password' => 'sessions#change_password'
+  post '/change_password' => 'sessions#change_password'
 
   get '/:id', to: 'players#show', as: 'player'
 end
