@@ -11,7 +11,10 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user
-    @current_user ||= session[:player_id] && Player.find(session[:player_id])
+    unless instance_variable_defined?(:@current_user)
+      @current_user = session[:player_id] && Player.find(session[:player_id])
+    end
+    @current_user
   end
   helper_method :current_user
 
@@ -25,7 +28,8 @@ class ApplicationController < ActionController::Base
   end
 
   def admin?
-    Rails.application.secrets[:shared_secret].present? && request.authorization &&
+    current_user&.is_admin? ||
+      Rails.application.secrets[:shared_secret].present? && request.authorization &&
       (auth_parts = request.authorization.split(' ', 2)) &&
       auth_parts[0] == 'Bearer' &&
       auth_parts[1] == Rails.application.secrets[:shared_secret]

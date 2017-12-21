@@ -5,7 +5,7 @@ class SessionsController < ApplicationController
   end
 
   def create
-    player = Player.find_by(name: params[:name])
+    player = Player.where("LOWER(name)=?", params[:name].downcase).take
     if player && player.authenticate(params[:password])
       session.clear
       session[:player_id] = player.id

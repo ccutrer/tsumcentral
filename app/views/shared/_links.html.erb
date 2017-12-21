@@ -1,0 +1,7 @@
+<% if current_user %>
+  <%= link_to 'Change Password', change_password_path %>
+  <%= link_to 'Log Out', login_path, method: :delete %>
+<% end %>
+<% if request.path != '/' && current_user.is_admin? %>
+  <%= link_to 'All Users', root_path %>
+<% end %>

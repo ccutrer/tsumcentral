@@ -23,7 +23,4 @@
   <% end %>
 </ul>
 
-<% if @player == current_user %>
-<%= link_to 'Change Password', change_password_path %>
-<%= link_to 'Log Out', login_path, method: :delete %>
-<% end %>
+<%= render partial: 'shared/links' %>
