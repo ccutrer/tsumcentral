@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171221163758) do
+ActiveRecord::Schema.define(version: 20171221193308) do
 
   create_table "players", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "paused_until"
+    t.string "password_digest"
     t.index ["name"], name: "index_players_on_name"
   end
 

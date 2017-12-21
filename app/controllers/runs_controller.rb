@@ -1,5 +1,6 @@
 class RunsController < ApplicationController
   protect_from_forgery except: [:create, :end]
+  before_action :require_admin
 
   def create
     player = Player.find_by(name: params[:id])
