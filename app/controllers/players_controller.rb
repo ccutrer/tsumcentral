@@ -5,7 +5,7 @@ class PlayersController < ApplicationController
     return redirect_to player_url(@current_user) unless admin?
 
     respond_to do |format|
-      format.json { Player.all.map(&:as_json) }
+      format.json { render json: Player.all.map(&:as_json) }
       format.html
     end
   end
@@ -14,7 +14,7 @@ class PlayersController < ApplicationController
     @player = Player.find_by(name: params[:id])
     return render :unauthorized unless admin? || @player == @current_user
     respond_to do |format|
-      format.json { @player.as_json }
+      format.json { render json: @player.as_json }
       format.html
     end
   end

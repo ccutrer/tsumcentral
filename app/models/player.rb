@@ -34,7 +34,8 @@ class Player < ApplicationRecord
   def as_json
     {
       name: name,
-      next_run: next_run
+      next_run: next_run.utc,
+      run_now: next_run <= Time.zone.now
     }
   end
 end
