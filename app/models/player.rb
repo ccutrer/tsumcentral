@@ -23,6 +23,16 @@ class Player < ApplicationRecord
     paused_until && paused_until > Time.zone.now
   end
 
+  def status
+    if running?
+      'running'
+    elsif paused?
+      'paused'
+    else
+      'idle'
+    end
+  end
+
   def next_run
     last_run = runs.last
 
