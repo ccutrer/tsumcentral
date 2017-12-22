@@ -13,7 +13,7 @@ class RunsController < ApplicationController
     player = Player.find_by(name: params[:id])
     run = player.runs.last!
     run.ended_at = Time.zone.now
-    run.hearts_given = params[:hearts_given].to_i if params[:hearts_given]
+    run.hearts_given = params[:hearts_given].to_i if params[:hearts_given].present?
     run.save!
     render plain: "OK\n"
   end
