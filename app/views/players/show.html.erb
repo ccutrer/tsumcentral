@@ -10,7 +10,7 @@
   <h2>Idle</h2>
 <% end %>
 <% unless @player.running? %>
-  <%= next_run = @player.next_run %>
+  <% next_run = @player.next_run %>
   <p>Next run: <%= next_run < Time.zone.now ? 'anytime now' : "#{next_run} (#{distance_of_time_in_words(next_run - Time.zone.now)})" %></p>
 <% end %>
 <% unless @player.paused? %>
