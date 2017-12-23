@@ -1,6 +1,6 @@
 <ul>
   <% Player.order(:name).each do |player| %>
-    <li><%= link_to player.name, player_path(player) %> (<%= player.status %>)</li>
+    <li><%= link_to player.name, player_path(player) %> (<%= status(player) %>)</li>
   <% end %>
 </ul>
 
