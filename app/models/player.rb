@@ -25,6 +25,7 @@ class Player < ApplicationRecord
 
   def next_run
     return nil if suspended?
+    return Time.zone.now if run_now?
 
     last_run = runs.last
 

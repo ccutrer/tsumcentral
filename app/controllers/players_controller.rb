@@ -1,7 +1,7 @@
 class PlayersController < ApplicationController
   before_action :require_user_or_admin
   before_action :find_player, except: :index
-  before_action :require_admin, only: [:suspend, :unsuspend]
+  before_action :require_admin, only: [:suspend, :unsuspend, :run_now]
 
   def index
     return redirect_to player_url(@current_user) unless admin?
@@ -20,6 +20,7 @@ class PlayersController < ApplicationController
   end
 
   def pause
+    @player.run_now = false
     @player.update_attribute(:paused_until, Time.zone.now + 1.hour)
     redirect_to player_path(@player)
   end
@@ -36,6 +37,12 @@ class PlayersController < ApplicationController
 
   def unsuspend
     @player.update_attribute(:suspended, false)
+    redirect_to player_path(@player)
+  end
+
+  def run_now
+    @player.paused_until = nil
+    @player.update_attribute(:run_now, true)
     redirect_to player_path(@player)
   end
 
