@@ -1,6 +1,8 @@
 module PlayerHelper
   def status(player)
-    if player.running?
+    if player.suspended?
+      "suspended"
+    elsif player.running?
       "running for #{distance_of_time_in_words(Time.zone.now - player.current_run.created_at)}"
     elsif player.paused?
       "paused for #{distance_of_time_in_words(player.paused_until - Time.zone.now)}"

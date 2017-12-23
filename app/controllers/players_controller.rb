@@ -1,5 +1,7 @@
 class PlayersController < ApplicationController
   before_action :require_user_or_admin
+  before_action :find_player, except: :index
+  before_action :require_admin, only: [:suspend, :unsuspend]
 
   def index
     return redirect_to player_url(@current_user) unless admin?
@@ -11,8 +13,6 @@ class PlayersController < ApplicationController
   end
 
   def show
-    @player = Player.find_by(name: params[:id])
-    return render :unauthorized unless admin? || @player == @current_user
     respond_to do |format|
       format.json { render json: @player.as_json }
       format.html
@@ -20,18 +20,33 @@ class PlayersController < ApplicationController
   end
 
   def pause
-    player = Player.find_by(name: params[:id])
-    return render :unauthorized unless admin? || player == @current_user
-    player.paused_until = Time.zone.now + 1.hour
-    player.save!
-    redirect_to player_path(player)
+    @player.update_attribute(:paused_until, Time.zone.now + 1.hour)
+    redirect_to player_path(@player)
   end
 
   def unpause
-    player = Player.find_by(name: params[:id])
-    return render :unauthorized unless admin? || player == @current_user
-    player.paused_until = nil
-    player.save! if player.changed?
-    redirect_to player_path(player)
+    @player.update_attribute(:paused_until, nil)
+    redirect_to player_path(@player)
+  end
+
+  def suspend
+    @player.update_attribute(:suspended, true)
+    redirect_to player_path(@player)
+  end
+
+  def unsuspend
+    @player.update_attribute(:suspended, false)
+    redirect_to player_path(@player)
+  end
+
+  protected
+
+  def find_player
+    @player = Player.find_by(name: params[:id])
+    return render :unauthorized unless admin? || @player == @current_user
+  end
+
+  def require_admin
+    return render :unauthorized unless admin?
   end
 end

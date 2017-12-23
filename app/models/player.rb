@@ -24,6 +24,8 @@ class Player < ApplicationRecord
   end
 
   def next_run
+    return nil if suspended?
+
     last_run = runs.last
 
     result = last_run.created_at + 38.minutes if last_run
@@ -32,10 +34,11 @@ class Player < ApplicationRecord
   end
 
   def as_json
+    next_run = self.next_run
     {
       name: name,
-      next_run: next_run.utc,
-      run_now: next_run <= Time.zone.now
+      next_run: next_run&.utc,
+      run_now: next_run && next_run <= Time.zone.now
     }
   end
 end

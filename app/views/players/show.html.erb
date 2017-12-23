@@ -1,7 +1,10 @@
 <h1><%= @player.name %></h1>
-<% if @player.running? %>
+<% if @player.suspended? %>
+  <h2>Suspended</h2>
+  <%= link_to 'Unsuspend', unsuspend_path(@player), method: :delete if current_user.is_admin? %>
+<% elsif @player.running? %>
   <h2>Running</h2>
-    <p>For <%= distance_of_time_in_words(Time.zone.now - @player.runs.last.created_at) %></p>
+  <p>For <%= distance_of_time_in_words(Time.zone.now - @player.runs.last.created_at) %></p>
 <% elsif @player.paused? %>
   <h2>Paused</h2>
   <%= link_to 'Extend Pause', pause_path(@player), method: :post %>
@@ -9,12 +12,15 @@
 <% else %>
   <h2>Idle</h2>
 <% end %>
-<% unless @player.running? %>
-  <% next_run = @player.next_run %>
-  <p>Next run: <%= next_run < Time.zone.now ? 'anytime now' : "#{l(next_run, format: :short)} (in #{distance_of_time_in_words(next_run - Time.zone.now)})" %></p>
-<% end %>
-<% unless @player.paused? %>
-  <%= link_to 'Pause', pause_path(@player), method: :post %>
+<% unless @player.suspended? %>
+  <% unless @player.running? %>
+    <% next_run = @player.next_run %>
+    <p>Next run: <%= next_run < Time.zone.now ? 'anytime now' : "#{l(next_run, format: :short)} (in #{distance_of_time_in_words(next_run - Time.zone.now)})" %></p>
+  <% end %>
+  <% unless @player.paused? %>
+    <%= link_to 'Pause', pause_path(@player), method: :post %>
+  <% end %>
+  <%= link_to 'Suspend', suspend_path(@player), method: :post if current_user.is_admin? %>
 <% end %>
 
 <h2>Prior Runs</h2>
