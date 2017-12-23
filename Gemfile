@@ -8,6 +8,7 @@ end
 
 gem 'bcrypt', '~> 3.1'
 gem 'rails', '~> 5.1.4'
+gem 'rails-i18n', '~> 5.0'
 gem 'sprockets-rails', '~> 3.2'
 gem 'sqlite3'
 gem 'puma', '~> 3.7'

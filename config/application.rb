@@ -25,5 +25,6 @@ module Tsumcontrol
     config.generators.system_tests = nil
 
     config.time_zone = 'America/Denver'
+    config.i18n.default_locale = :"en-US"
   end
 end
