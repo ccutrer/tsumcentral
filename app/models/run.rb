@@ -6,7 +6,7 @@ class Run < ApplicationRecord
   after_create :reset_run_now
 
   def runtime
-    ended_at && ended_at - created_at
+    ended_at&.- created_at
   end
 
   def failed?
