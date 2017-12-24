@@ -28,7 +28,7 @@ class Player < ApplicationRecord
     count = 0
     prior_run = nil
     last_runs.reverse.each do |run|
-      next if prior_run && run.ended_at - prior_run.ended_at < 60.minutes
+      next if prior_run && prior_run.ended_at - run.ended_at < 60.minutes
       prior_run = run
       count += 1
     end
