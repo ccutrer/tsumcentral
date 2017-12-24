@@ -25,7 +25,7 @@
 <% end %>
 
 <h2>Prior Runs</h2>
-<h3><%= @player.twenty_four_hour_heart_sets %> sets of heart given in the past 24 hours</h3>
+<h3><%= @player.twenty_four_hour_heart_sets %> sets of hearts given in the past 24 hours</h3>
 <ul>
   <% @player.runs.reverse_order.not_running.limit(24).each do |run| %>
     <li><%= l(run.created_at, format: :short) %> (took <%= distance_of_time_in_words(run.runtime) %>): <%= run.summary %></li>
