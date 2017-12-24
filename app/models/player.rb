@@ -23,6 +23,18 @@ class Player < ApplicationRecord
     paused_until && paused_until > Time.zone.now
   end
 
+  def twenty_four_hour_heart_sets
+    last_runs = runs.where.not(hearts_given: [0, nil]).where("ended_at>?", 24.hours.ago)
+    count = 0
+    prior_run = nil
+    last_runs.reverse.each do |run|
+      next if prior_run && run.ended_at - prior_run.ended_at < 60.minutes
+      prior_run = run
+      count += 1
+    end
+    count
+  end
+
   def next_run
     return nil if suspended?
     return Time.zone.now if run_now?
