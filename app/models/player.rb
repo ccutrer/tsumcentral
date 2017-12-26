@@ -41,7 +41,7 @@ class Player < ApplicationRecord
 
     last_runs = runs.last(2)
     # still running; don't run again
-    return nil if last_runs.last&.ended_at&.nil?
+    return nil if last_runs.last&.ended_at.nil?
 
     succesful_runs = last_runs.select { |run| run.hearts_given.to_i > 0 }
 
