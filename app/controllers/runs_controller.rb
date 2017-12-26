@@ -6,7 +6,7 @@ class RunsController < ApplicationController
     player = Player.find_by(name: params[:id])
     player.runs.where(ended_at: nil).update_all(ended_at: Time.zone.now)
     player.runs.create!
-    render plain: "OK\n"
+    render json: { status: "OK" }
   end
 
   def end
@@ -15,6 +15,6 @@ class RunsController < ApplicationController
     run.ended_at = Time.zone.now
     run.hearts_given = params[:hearts_given].to_i if params[:hearts_given].present?
     run.save!
-    render plain: "OK\n"
+    render json: { status: "OK" }
   end
 end
