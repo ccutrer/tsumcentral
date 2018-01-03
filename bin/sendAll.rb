@@ -95,6 +95,12 @@ players.map do |player|
 		sleep 30
       end
 	  mutex.synchronize do
+	    status = wrap("fetching current status for #{player}") do
+          request(url, shared_secret, "#{player}")
+        end
+		# they paused while we were waiting to run
+		next if status && status['run_now'] != true
+
   	    last_loop = Time.now
 		wrap("starting run for #{player}") do
           request(url, shared_secret, "#{player}/runs", :Post)
