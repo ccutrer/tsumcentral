@@ -36,11 +36,11 @@ rescue => e
   log("Failed #{desc}: #{e.inspect}: #{e.backtrace}")
 end
 
-def launch(who)
+def launch(who, timeout)
   pid = Process.spawn("\"C:\\Program Files\\AutoHotkey\\AutoHotkeyU64.exe\" sendAll.ahk #{who}")
   log "waiting for #{pid} (#{who})"
   begin
-    Timeout.timeout(25 * 60) do
+    Timeout.timeout(timeout || 25 * 60) do
       Thread.new { Process.waitpid(pid) }.join
     end
 	log "#{pid} done"
@@ -105,7 +105,7 @@ players.map do |player|
 		wrap("starting run for #{player}") do
           request(url, shared_secret, "#{player}/runs", :Post)
         end
-	    launch("Nox#{player}")
+	    launch("Nox#{player}", status && status['timeout'])
 		wrap("marking run complete for #{player}") do
           request(url, shared_secret, "#{player}/runs?hearts_given=#{hearts_sent(player, last_loop)}", :Delete)
 		end
