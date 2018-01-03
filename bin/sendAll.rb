@@ -43,7 +43,7 @@ def launch(who, timeout)
     Timeout.timeout(timeout || 25 * 60) do
       Thread.new { Process.waitpid(pid) }.join
     end
-	log "#{pid} done"
+  log "#{pid} done"
   rescue Timeout::Error
     log "timed out (#{who})"
     Process.kill('KILL', pid)
@@ -54,11 +54,11 @@ def hearts_sent(who, start_at)
   File.open("Nox#{who}.log", 'rb') do |f|
     f.seek([f.size - 4096, 0].max)
     lines = f.readlines
-	# ignore the first, probably partial, line
-	lines.shift
-    lines.each do |line|
-      next unless line =~ /(\d+) Given/
-	  next unless Time.parse(line) > start_at
+    # ignore the first, probably partial, line
+    lines.shift
+      lines.each do |line|
+        next unless line =~ /(\d+) Given/
+        next unless Time.parse(line) > start_at
       return $1.to_i
     end
   end
@@ -73,44 +73,43 @@ players.map do |player|
   sleep 5
   Thread.new do
     # clean up any old runs
-	wrap("aborting previous runs for #{player}") do
-      request(url, shared_secret, "#{player}/runs", :Delete)
-	end
+  wrap("aborting previous runs for #{player}") do
+    request(url, shared_secret, "#{player}/runs", :Delete)
+  end
 
-	last_loop = Time.now
-	loop do
+  last_loop = Time.now
+  loop do
       failures = 0
-	  loop do
+      loop do
         status = wrap("fetching current status for #{player}") do
           request(url, shared_secret, "#{player}")
-  	    end
-		if status.nil?
-		  failures += 1
+        end
+        if status.nil?
+          failures += 1
           # couldn't contact server, just run after 38 minutes
-		  break if failures >= 10 && (Time.now - last_loop) > 38 * 60
+          break if failures >= 10 && (Time.now - last_loop) > 38 * 60
         else
-		  failures = 0
+          failures = 0
           break if status['run_now'] == true
-		end
-		sleep 30
+        end
+        sleep 30
       end
-	  mutex.synchronize do
-	    status = wrap("fetching current status for #{player}") do
+      mutex.synchronize do
+        status = wrap("fetching current status for #{player}") do
           request(url, shared_secret, "#{player}")
         end
-		# they paused while we were waiting to run
-		next if status && status['run_now'] != true
+        # they paused while we were waiting to run
+        next if status && status['run_now'] != true
 
-  	    last_loop = Time.now
-		wrap("starting run for #{player}") do
+        last_loop = Time.now
+        wrap("starting run for #{player}") do
           request(url, shared_secret, "#{player}/runs", :Post)
         end
-	    launch("Nox#{player}", status && status['timeout'])
-		wrap("marking run complete for #{player}") do
+        launch("Nox#{player}", status && status['timeout'])
+        wrap("marking run complete for #{player}") do
           request(url, shared_secret, "#{player}/runs?hearts_given=#{hearts_sent(player, last_loop)}", :Delete)
-		end
+        end
       end
     end
   end
 end.each(&:join)
-
