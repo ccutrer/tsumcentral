@@ -1,3 +1,5 @@
+require 'tsum_tsum_time_helper'
+
 class Player < ApplicationRecord
   has_secure_password
 
@@ -23,8 +25,8 @@ class Player < ApplicationRecord
     paused_until && paused_until > Time.zone.now
   end
 
-  def twenty_four_hour_heart_sets
-    last_runs = runs.where.not(hearts_given: [0, nil]).where("ended_at>?", 24.hours.ago)
+  def heart_sets(end_of_period = Time.zone.now, timespan = 24.hours)
+    last_runs = runs.where.not(hearts_given: [0, nil]).where("ended_at<=? AND ended_at>?", end_of_period, end_of_period - timespan)
     count = 0
     prior_run = nil
     last_runs.reverse.each do |run|
@@ -33,6 +35,15 @@ class Player < ApplicationRecord
       count += 1
     end
     count
+  end
+  alias twenty_four_hour_heart_sets heart_sets
+
+  def last_game_day_heart_sets
+    heart_sets(TsumTsumTimeHelper.end_of_last_game_day)
+  end
+
+  def last_game_week_heart_sets
+    heart_sets(TsumTsumTimeHelper.end_of_last_game_week, 7.days)
   end
 
   def next_run
