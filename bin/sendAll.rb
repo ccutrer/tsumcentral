@@ -37,7 +37,7 @@ rescue => e
   log("Failed #{desc}: #{e.inspect}: #{e.backtrace}")
 end
 
-def launch(who, timeout, claim_only)
+def launch(who, timeout, claim_only, start_at)
   pid = Process.spawn("\"C:\\Program Files\\AutoHotkey\\AutoHotkeyU64.exe\" sendAll.ahk #{who}#{' --claim-only' if claim_only}")
   log "waiting for #{pid} (#{who}), timeout #{timeout}#{', claim only' if claim_only}"
   timeout ||= 25 * 60
@@ -47,7 +47,7 @@ def launch(who, timeout, claim_only)
   # we kill you
   begin
     Timeout.timeout(60) do
-      Process.waitpid(pid)
+      Thread.new { Process.waitpid(pid) }.join
     end
 	# already done? that was fast! probably a claim only
     log "#{pid} done"
@@ -63,7 +63,7 @@ def launch(who, timeout, claim_only)
 
   begin
     Timeout.timeout(timeout) do
-      Process.waitpid(pid)
+      Thread.new { Process.waitpid(pid) }.join
     end
     log "#{pid} done"
   rescue Timeout::Error
@@ -88,7 +88,7 @@ def hearts_sent(who, start_at)
 end
 
 def check_started(who, start_at)
-  File.open("Nox#{who}.log", 'rb') do |f|
+  File.open("#{who}.log", 'rb') do |f|
     f.seek([f.size - 4096, 0].max)
     lines = f.readlines
     # ignore the first, probably partial, line
@@ -142,7 +142,7 @@ players.map do |player|
         wrap("starting run for #{player}") do
           request(url, shared_secret, "#{player}/runs", :Post)
         end
-        launch("Nox#{player}", status && status['timeout'], status && status['claim_only'])
+        launch("Nox#{player}", status && status['timeout'], status && status['claim_only'], last_loop)
         wrap("marking run complete for #{player}") do
           request(url, shared_secret, "#{player}/runs?hearts_given=#{hearts_sent(player, last_loop)}", :Delete)
         end
