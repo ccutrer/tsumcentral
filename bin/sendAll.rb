@@ -43,11 +43,12 @@ def launch(who, timeout, claim_only, start_at)
   timeout ||= 25 * 60
   timeout -= 60
 
+  waiter_thread = Thread.new { Process.waitpid(pid) }
   # you get one minute to log something besides "Start", otherwise
   # we kill you
   begin
     Timeout.timeout(60) do
-      Thread.new { Process.waitpid(pid) }.join
+      waiter_thread.join
     end
 	# already done? that was fast! probably a claim only
     log "#{pid} done"
@@ -63,7 +64,7 @@ def launch(who, timeout, claim_only, start_at)
 
   begin
     Timeout.timeout(timeout) do
-      Thread.new { Process.waitpid(pid) }.join
+      waiter_thread.join
     end
     log "#{pid} done"
   rescue Timeout::Error
