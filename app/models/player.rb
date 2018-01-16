@@ -25,8 +25,10 @@ class Player < ApplicationRecord
     paused_until && paused_until > Time.zone.now
   end
 
-  def heart_sets(end_of_period = Time.zone.now, timespan = 24.hours)
-    last_runs = runs.where.not(hearts_given: [0, nil]).where("ended_at<=? AND ended_at>?", end_of_period, end_of_period - timespan)
+  def heart_sets(end_of_period = Time.zone.now, timespan: nil, start_of_period: nil)
+    timespan = 24.hours if timespan.nil? && start_of_period.nil?
+    start_of_period ||= end_of_period - timespan
+    last_runs = runs.where.not(hearts_given: [0, nil]).where("ended_at<=? AND ended_at>?", end_of_period, start_of_period)
     count = 0
     prior_run = nil
     last_runs.reverse.each do |run|
@@ -36,14 +38,17 @@ class Player < ApplicationRecord
     end
     count
   end
-  alias twenty_four_hour_heart_sets heart_sets
 
   def last_game_day_heart_sets
     heart_sets(TsumTsumTimeHelper.end_of_last_game_day)
   end
 
+  def current_game_week_heart_sets
+    heart_sets(start_of_period: TsumTsumTimeHelper.end_of_last_game_week)
+  end
+
   def last_game_week_heart_sets
-    heart_sets(TsumTsumTimeHelper.end_of_last_game_week, 7.days)
+    heart_sets(TsumTsumTimeHelper.end_of_last_game_week, timespan: 7.days)
   end
 
   RUN_STRIDE = 15.minutes
