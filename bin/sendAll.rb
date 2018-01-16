@@ -21,6 +21,7 @@ def request(base_url, shared_secret, path, method = :Get)
   http.use_ssl = uri.scheme == 'https'
   http.verify_mode = OpenSSL::SSL::VERIFY_NONE if uri.scheme == 'https'
   res = http.start { |h| h.request(req) }
+  return nil if res.code == '502' # server is rebooting; silently ignore
   JSON.load(res.body)
 end
 
