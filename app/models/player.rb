@@ -52,7 +52,7 @@ class Player < ApplicationRecord
     return nil if suspended?
     return Time.zone.now if run_now?
 
-    last_runs = runs.last(8)
+    last_runs = runs.where("ended_at>=?", 1.hour.ago)
     # no runs? run now!
     return Time.zone.now if last_runs.empty?
     # still running; don't run again

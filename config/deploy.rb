@@ -37,3 +37,14 @@ append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "public/syst
 
 # Uncomment the following to require manually verifying the host key before first deploy.
 # set :ssh_options, verify_host_key: :secure
+require 'net/ssh/proxy/command'
+
+# Use a default host for the bastion, but allow it to be overridden
+bastion_host = ENV['BASTION_HOST'] || 'cody.cutrer.us'
+
+# Use the local username by default
+bastion_user = ENV['BASTION_USER'] || ENV['USER']
+
+# Configure Capistrano to use the bastion host as a proxy
+ssh_command = "ssh #{bastion_user}@#{bastion_host} -W %h:%p"
+set :ssh_options, proxy: Net::SSH::Proxy::Command.new(ssh_command)
