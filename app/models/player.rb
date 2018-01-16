@@ -53,6 +53,7 @@ class Player < ApplicationRecord
     return Time.zone.now if run_now?
 
     last_runs = runs.where("ended_at>=?", 1.hour.ago)
+    last_runs = runs.last(2) if last_runs.length < 2
     # no runs? run now!
     return Time.zone.now if last_runs.empty?
     # still running; don't run again
