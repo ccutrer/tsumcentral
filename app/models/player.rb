@@ -87,13 +87,28 @@ class Player < ApplicationRecord
     max_runtime&.to_i
   end
 
+  def claim_only?
+    last_runs = runs.last(2)
+    return false unless last_runs.length == 2
+      # two runs ago was claim only
+    last_runs.first.hearts_given == 0 &&
+      # last run was successful
+      last_runs.last.hearts_given.to_i > 0 &&
+      # last run _started_ within the last hour (if it started before this, some might be ready to claim again)
+      last_runs.last.created_at > 1.hour.ago
+  end
+
   def as_json
     next_run = self.next_run
+    timeout = self.timeout
+    claim_only = claim_only?
+    timeout = 120 if claim_only
     {
       name: name,
       next_run: next_run&.utc,
       run_now: next_run && next_run <= Time.zone.now,
-      timeout: timeout
+      timeout: timeout,
+      claim_only: claim_only
     }
   end
 end
