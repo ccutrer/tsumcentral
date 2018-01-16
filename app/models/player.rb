@@ -71,12 +71,12 @@ class Player < ApplicationRecord
     post_run = successful_runs.last&.ended_at&.+ 60.minutes
     # an hour plus the stride length after a previous run _started_
     pre_run_plus_stride = successful_runs.last&.created_at&.+ RUN_STRIDE + 60.minutes
-    # 45 minutes after a run ended (you should only see this if your run took less than stride)
-    # half the stride of the last run
-    prior_run = heart_claiming_runs.last || successful_runs.last
-    mid_stride_heart_claim = prior_run&.created_at&.+ (RUN_STRIDE + 60.minutes) / 2
-    # 10 minutes after a failed run
-    failed_run = last_runs.last.ended_at + 10.minutes if last_runs.last.hearts_given.nil?
+    # if the last succesful run was relatively quick, schedule another run just to claim hearts
+    if successful_runs.last && successful_runs.last.runtime < RUN_STRIDE && successful_runs.last == heart_claiming_runs.last
+      mid_stride_heart_claim = prior_run.created_at + (prior_run.runtime + 60.minutes) / 2
+    end
+    # 5 minutes after a failed run
+    failed_run = last_runs.last.ended_at + 5.minutes if last_runs.last.hearts_given.nil?
 
     next_run = [post_run, pre_run_plus_stride, mid_stride_heart_claim, failed_run].compact.min
     # nothing? must have been a failure, and then no hearts given. just run again in 10 minutes
