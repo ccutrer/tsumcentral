@@ -101,6 +101,9 @@ CheckConnection:
 		if (FindPixel(Px1, Py1, 45, 555, 55, 565, 0x9540DE)) {
 			Break
 		} else {
+			; OK button in Receive Gift popup
+			FindAndClick(310, 435, 320, 445, 0x0AB0F2)
+
 			; Close Button Search 5YY Range
 			FindAndClick(195, 550, 205, 560, 0x0AADF0)
 			
