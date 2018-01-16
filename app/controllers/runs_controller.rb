@@ -18,7 +18,7 @@ class RunsController < ApplicationController
     player = Player.find_by(name: params[:id])
     run = player.runs.last
     # only finish a run if it wasn't already done
-    return render json: { status: "Not Found" }, status: 404 if !run || run.ended_at.nil?
+    return render json: { status: "Not Found" }, status: 404 if !run || !run.ended_at.nil?
 
     run.ended_at = Time.zone.now
     run.hearts_given = params[:hearts_given].to_i if params[:hearts_given].present?
