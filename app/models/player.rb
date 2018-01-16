@@ -82,6 +82,7 @@ class Player < ApplicationRecord
     next_run = [post_run, pre_run_plus_stride, mid_stride_heart_claim, failed_run].compact.min
     # nothing? must have been a failure, and then no hearts given. just run again in 10 minutes
     next_run ||= last_runs.last.ended_at + 10.minutes
+    @claim_only = next_run == mid_stride_heart_claim
 
     # subject to a temporary pause
     [next_run, paused_until].compact.max
@@ -105,14 +106,7 @@ class Player < ApplicationRecord
   end
 
   def claim_only?
-    last_runs = runs.last(2)
-    return false unless last_runs.length == 2
-      # two runs ago was claim only
-    last_runs.first.hearts_given == 0 &&
-      # last run was successful
-      last_runs.last.hearts_given.to_i > 0 &&
-      # last run _started_ within the last hour (if it started before this, some might be ready to claim again)
-      last_runs.last.created_at > 60.minutes.ago
+    @claim_only
   end
 
   def as_json
