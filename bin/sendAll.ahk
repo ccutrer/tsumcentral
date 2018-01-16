@@ -285,7 +285,10 @@ SendHearts:
 	
 				; Error 6 - Disconnected while giving hearts
 				if (FindAndClick(195, 550, 205, 560, 0x0AADF0)) {
-					AddLog("Disconnected.  " . GiveHearts . " Given")
+				    TotalHeartsGiven += GiveHearts
+					AddLog("Disconnected.  " . TotalHeartsGiven . " Given")
+					WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
+                    ProcSus(PID)
 					ExitApp
 				}
 
