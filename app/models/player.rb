@@ -70,12 +70,29 @@ class Player < ApplicationRecord
     [[earliest, latest].compact.min, paused_until].compact.max
   end
 
+  def timeout
+    last_runs = runs.where.not(hearts_given: nil).where("ended_at>=?", Time.zone.now - 24.hours).order(ended_at: :desc).to_a
+    max_runtime = 0
+    last_runs.each_with_index do |run, i|
+      runtime = 0
+      if i > 0 && last_runs[i - 1].ended_at - run.ended_at < 60.minutes
+        runtime += last_runs[i - 1].runtime
+      end
+      runtime += run.runtime
+      max_runtime = [runtime, max_runtime].max
+    end
+    max_runtime *= 1.20
+    max_runtime = nil if max_runtime == 0
+    max_runtime&.to_i
+  end
+
   def as_json
     next_run = self.next_run
     {
       name: name,
       next_run: next_run&.utc,
-      run_now: next_run && next_run <= Time.zone.now
+      run_now: next_run && next_run <= Time.zone.now,
+      timeout: timeout
     }
   end
 end
