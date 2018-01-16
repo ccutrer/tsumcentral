@@ -46,28 +46,33 @@ class Player < ApplicationRecord
     heart_sets(TsumTsumTimeHelper.end_of_last_game_week, 7.days)
   end
 
+  RUN_STRIDE = 20.minutes
+
   def next_run
     return nil if suspended?
     return Time.zone.now if run_now?
 
     last_runs = runs.last(2)
+    # no runs? run now!
+    return Time.zone.now if last_runs.empty?
     # still running; don't run again
-    return nil if last_runs.last&.ended_at.nil?
+    return nil if last_runs.last.ended_at.nil?
 
-    succesful_runs = last_runs.select { |run| run.hearts_given.to_i > 0 }
+    successful_runs = last_runs.select { |run| run.hearts_given.to_i > 0 }
 
-    # no later than 1 hour after a previous run that actually gave hearts completed
-    latest = succesful_runs.map(&:ended_at).min&.+ 60.minutes
+    # an 1 hour after a previous run _ended_
+    post_run = successful_runs.map(&:ended_at).min&.+ 60.minutes
+    # an hour plus the stride length after a previous run _started_
+    pre_run_plus_stride = successful_runs.map(&:created_at).min&.+ RUN_STRIDE
+    # 45 minutes after a run ended (you should only see this if your run took less than stride)
+    mid_stride_heart_claim = successful_runs.last&.ended_at&.+ 45.minutes
+    # 10 minutes after a failed run
+    failed_run = last_runs.last.ended_at + 10.minutes if last_runs.last.hearts_given.nil?
 
-    unless last_runs.empty?
-      # no earlier than half the stride of the slower of the two runs
-      earliest = last_runs.last.created_at + 30.minutes + last_runs.sort_by(&:runtime).last.runtime / 2
-    end
-    # no prior runs? now!
-    earliest ||= Time.zone.now
+    next_run = [post_run, pre_run_plus_stride, mid_stride_heart_claim, failed_run].compact.min
 
-    # choose the earlier of earliest, latest, but subject to a temporary pause
-    [[earliest, latest].compact.min, paused_until].compact.max
+    # subject to a temporary pause
+    [next_run, paused_until].compact.max
   end
 
   def timeout
