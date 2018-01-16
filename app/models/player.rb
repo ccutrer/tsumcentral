@@ -52,7 +52,7 @@ class Player < ApplicationRecord
     return nil if suspended?
     return Time.zone.now if run_now?
 
-    last_runs = runs.last(2)
+    last_runs = runs.last(8)
     # no runs? run now!
     return Time.zone.now if last_runs.empty?
     # still running; don't run again
@@ -70,6 +70,8 @@ class Player < ApplicationRecord
     failed_run = last_runs.last.ended_at + 10.minutes if last_runs.last.hearts_given.nil?
 
     next_run = [post_run, pre_run_plus_stride, mid_stride_heart_claim, failed_run].compact.min
+    # nothing? must have been a failure, and then no hearts given. just run again in 10 minutes
+    next_run ||= last_runs.last.ended_at + 10.minutes
 
     # subject to a temporary pause
     [next_run, paused_until].compact.max
