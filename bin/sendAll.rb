@@ -110,12 +110,12 @@ players.map do |player|
   sleep 5
   Thread.new do
     # clean up any old runs
-  wrap("aborting previous runs for #{player}") do
-    request(url, shared_secret, "#{player}/runs", :Delete)
-  end
+    wrap("aborting previous runs for #{player}") do
+      request(url, shared_secret, "#{player}/runs", :Delete)
+    end
 
-  last_loop = Time.now
-  loop do
+    last_loop = Time.now
+    loop do
       failures = 0
       loop do
         status = wrap("fetching current status for #{player}") do
