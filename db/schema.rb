@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171223205457) do
+ActiveRecord::Schema.define(version: 20180116015720) do
 
   create_table "players", force: :cascade do |t|
     t.string "name", null: false
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20171223205457) do
     t.boolean "is_admin", default: false, null: false
     t.boolean "suspended", default: false, null: false
     t.boolean "run_now", default: false, null: false
+    t.boolean "extend_timeout", default: false, null: false
     t.index ["name"], name: "index_players_on_name"
   end
 

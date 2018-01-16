@@ -83,6 +83,7 @@ class Player < ApplicationRecord
     end
     max_runtime *= 1.20
     max_runtime = nil if max_runtime == 0
+    max_runtime += 10 * 60 if max_runtime && extend_timeout?
     max_runtime&.to_i
   end
 

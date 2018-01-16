@@ -17,6 +17,7 @@
     <% next_run = @player.next_run %>
       <p>Next run: <%= next_run < Time.zone.now ? 'anytime now' : "#{l(next_run, format: :short)} (in #{distance_of_time_in_words(next_run - Time.zone.now)})" %></p>
       <%= link_to 'Run Now', run_now_path(@player), method: :post if !@player.run_now? && current_user.is_admin? %>
+      <%= link_to 'Extend Timeout for Next Run', extend_timeout_path(@player), method: :post unless @player.extend_timeout? %>
     <% end %>
   <% unless @player.paused? %>
     <%= link_to 'Pause', pause_path(@player), method: :post %>

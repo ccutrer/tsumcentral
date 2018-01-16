@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   post '/:id/suspend', to: 'players#suspend', as: 'suspend'
   delete '/:id/suspend', to: 'players#unsuspend', as: 'unsuspend'
   post '/:id/run_now', to: 'players#run_now', as: 'run_now'
+  post '/:id/extend_timeout', to: 'players#extend_timeout', as: 'extend_timeout'
   post '/:id/runs', to: 'runs#create'
   delete '/:id/runs', to: 'runs#end'
 

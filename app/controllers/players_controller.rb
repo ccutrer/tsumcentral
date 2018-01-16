@@ -46,6 +46,11 @@ class PlayersController < ApplicationController
     redirect_to player_path(@player)
   end
 
+  def extend_timeout
+    @player.update_attribute(:extend_timeout, true)
+    redirect_to player_path(@player)
+  end
+
   protected
 
   def find_player
