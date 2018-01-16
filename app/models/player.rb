@@ -68,9 +68,9 @@ class Player < ApplicationRecord
     heart_claiming_runs = last_runs.select { |run| !run.hearts_given.nil? }
 
     # an 1 hour after a previous run _ended_
-    post_run = successful_runs.last&.+ 60.minutes
+    post_run = successful_runs.last&.ended_at&.+ 60.minutes
     # an hour plus the stride length after a previous run _started_
-    pre_run_plus_stride = successful_runs.last&.+ RUN_STRIDE + 60.minutes
+    pre_run_plus_stride = successful_runs.last&.created_at&.+ RUN_STRIDE + 60.minutes
     # 45 minutes after a run ended (you should only see this if your run took less than stride)
     mid_stride_heart_claim = heart_claiming_runs.last&.ended_at&.+ (RUN_STRIDE + 60.minutes) / 2
     # 10 minutes after a failed run
