@@ -6,6 +6,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 CoordMode, Pixel, Screen
 
 WindowTitle = %1%
+ClaimOnly = %2%
 LogFile = %WindowTitle%.log
 
 WinGet, PID, PID, %WindowTitle% ahk_class Qt5QWindowIcon
@@ -57,6 +58,14 @@ Menu Tray, Tip, %Script_Name% %Script_Version% `n%WindowTitle% Res W%W% H%H%
 
  AddLog("Claiming All")
  GoSub, ClaimAll
+
+  if (ClaimOnly == "--claim-only") {
+    AddLog("0 Given; Claiming only")
+    WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
+    ProcSus(PID)
+    AddLog("End")
+    ExitApp 0
+  }
 
  AddLog("Reset")
  GoSub, Reset2Me
