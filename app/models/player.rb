@@ -46,7 +46,7 @@ class Player < ApplicationRecord
     heart_sets(TsumTsumTimeHelper.end_of_last_game_week, 7.days)
   end
 
-  RUN_STRIDE = 20.minutes
+  RUN_STRIDE = 15.minutes
 
   def next_run
     return nil if suspended?
@@ -63,7 +63,7 @@ class Player < ApplicationRecord
     # an 1 hour after a previous run _ended_
     post_run = successful_runs.map(&:ended_at).min&.+ 60.minutes
     # an hour plus the stride length after a previous run _started_
-    pre_run_plus_stride = successful_runs.map(&:created_at).min&.+ RUN_STRIDE
+    pre_run_plus_stride = successful_runs.map(&:created_at).min&.+ RUN_STRIDE + 60.minutes
     # 45 minutes after a run ended (you should only see this if your run took less than stride)
     mid_stride_heart_claim = successful_runs.last&.ended_at&.+ 45.minutes
     # 10 minutes after a failed run
@@ -102,7 +102,7 @@ class Player < ApplicationRecord
       # last run was successful
       last_runs.last.hearts_given.to_i > 0 &&
       # last run _started_ within the last hour (if it started before this, some might be ready to claim again)
-      last_runs.last.created_at > 1.hour.ago
+      last_runs.last.created_at > 60.minutes.ago
   end
 
   def as_json
