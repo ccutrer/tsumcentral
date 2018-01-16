@@ -40,11 +40,32 @@ end
 def launch(who, timeout, claim_only)
   pid = Process.spawn("\"C:\\Program Files\\AutoHotkey\\AutoHotkeyU64.exe\" sendAll.ahk #{who}#{' --claim-only' if claim_only}")
   log "waiting for #{pid} (#{who}), timeout #{timeout}#{', claim only' if claim_only}"
+  timeout ||= 25 * 60
+  timeout -= 60
+
+  # you get one minute to log something besides "Start", otherwise
+  # we kill you
   begin
-    Timeout.timeout(timeout || 25 * 60) do
-      Thread.new { Process.waitpid(pid) }.join
+    Timeout.timeout(60) do
+      Process.waitpid(pid)
     end
-  log "#{pid} done"
+	# already done? that was fast! probably a claim only
+    log "#{pid} done"
+    return
+  rescue Timeout::Error
+    unless check_started(who, start_at)
+	  log "#{who} failed to start"
+	  Process.kill('KILL', pid)
+	  return
+    end
+	# this is the normal happy path, continue to a full wait below
+  end
+
+  begin
+    Timeout.timeout(timeout) do
+      Process.waitpid(pid)
+    end
+    log "#{pid} done"
   rescue Timeout::Error
     log "timed out (#{who})"
     Process.kill('KILL', pid)
@@ -57,13 +78,28 @@ def hearts_sent(who, start_at)
     lines = f.readlines
     # ignore the first, probably partial, line
     lines.shift
-      lines.each do |line|
-        next unless line =~ /(\d+) Given/
-        next unless Time.parse(line) > start_at
+    lines.each do |line|
+      next unless line =~ /(\d+) Given/
+      next unless Time.parse(line) > start_at
       return $1.to_i
     end
   end
   nil
+end
+
+def check_started(who, start_at)
+  File.open("Nox#{who}.log", 'rb') do |f|
+    f.seek([f.size - 4096, 0].max)
+    lines = f.readlines
+    # ignore the first, probably partial, line
+    lines.shift
+    lines.each do |line|
+      next if line =~ /Start/
+      next unless Time.parse(line) > start_at
+      return true
+    end
+  end
+  false
 end
 
 players = request(url, shared_secret, "/").map { |x| x['name'] }
