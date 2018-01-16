@@ -72,7 +72,7 @@ class Player < ApplicationRecord
     # an hour plus the stride length after a previous run _started_
     pre_run_plus_stride = successful_runs.last&.created_at&.+ RUN_STRIDE + 60.minutes
     # if the last succesful run was relatively quick, schedule another run just to claim hearts
-    if successful_runs.last && successful_runs.last.runtime <  * 2 && successful_runs.last == heart_claiming_runs.last
+    if successful_runs.last && successful_runs.last.runtime < RUN_STRIDE * 2 && successful_runs.last == heart_claiming_runs.last
       prior_run = successful_runs.last
       mid_stride_heart_claim = prior_run.created_at + (prior_run.runtime + 60.minutes) / 2
     end
