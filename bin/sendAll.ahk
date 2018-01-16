@@ -21,69 +21,77 @@ Script_Version = V3.3
 Menu Tray, Tip, %Script_Name% %Script_Version% `n%WindowTitle% Res W%W% H%H%
 
 
-;---------- GLOBAL VAR ---------
- GiveHearts = 0
-
 ;---------- MAIN LOGIC ------
 
- AddLog("Start; Nox PID: " . PID)
- ProcRes(PID)
- WinRestore, %WindowTitle% ahk_class Qt5QWindowIcon
+AddLog("Start; Nox PID: " . PID)
+ProcRes(PID)
+WinRestore, %WindowTitle% ahk_class Qt5QWindowIcon
 
- if (W == "") {
-   AddLog("Could not find emulator window " . WindowTitle)
-   ExitApp 1
- }
+if (W == "") {
+  AddLog("Could not find emulator window " . WindowTitle)
+  ExitApp 1
+}
 
- ; 405x720 + 24pixel virtual buttons on the bottom
- if (W != 405) || (H != 744) {
-   AddLog("Emulator is not 405x720. Please adjust the resolution.")
-   ExitApp 2
- }
+; 405x720 + 24pixel virtual buttons on the bottom
+if (W != 405) || (H != 744) {
+  AddLog("Emulator is not 405x720. Please adjust the resolution.")
+  ExitApp 2
+}
 
- if (X != 2) || (Y != 30) {
-   AddLog("Emulator chrome is an odd size. Help!")
-   ExitApp 3
- }
+if (X != 2) || (Y != 30) {
+  AddLog("Emulator chrome is an odd size. Help!")
+  ExitApp 3
+}
 
-  ; Press Home
- Sleep, 1000
- ControlClick, x204 y760, %WindowTitle% ahk_class Qt5QWindowIcon
- Sleep, 1000
- ; Open the App
- ControlClick, x204 y437, %WindowTitle% ahk_class Qt5QWindowIcon
- Sleep, 2000
+; Press Home
+Sleep, 1000
+ControlClick, x204 y760, %WindowTitle% ahk_class Qt5QWindowIcon
+Sleep, 1000
+; Open the App
+ControlClick, x204 y437, %WindowTitle% ahk_class Qt5QWindowIcon
+Sleep, 2000
 
- GoSub, CheckConnection
+GoSub, CheckConnection
 
- AddLog("Claiming All")
- GoSub, ClaimAll
+AddLog("Claiming All")
+GoSub, ClaimAll
 
-  if (ClaimOnly == "--claim-only") {
-    AddLog("0 Given; Claiming only")
-    WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
-    ProcSus(PID)
-    AddLog("End")
-    ExitApp 0
+if (ClaimOnly == "--claim-only") {
+  AddLog("0 Given; Claiming only")
+  WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
+  ProcSus(PID)
+  AddLog("End")
+  ExitApp 0
+}
+
+TotalHeartsGiven = 0
+
+Loop
+{
+  AddLog("Reset")
+  GoSub, Reset2Me
+
+  AddLog("Scrolling to top...")
+  GoSub, Scroll2Top
+
+  AddLog("Giving Hearts...")
+  GoSub, SendHearts
+  AddLog(GiveHearts . " hearts given this round")
+
+  TotalHeartsGiven += GiveHearts
+  if (GiveHearts == 0) {
+    Break
   }
 
- AddLog("Reset")
- GoSub, Reset2Me
+  AddLog("Claiming All")
+  GoSub, ClaimAll
+}
 
- AddLog("Scrolling to top...")
- GoSub, Scroll2Top
+AddLog(TotalHeartsGiven . " Given")
 
- AddLog("Giving Hearts...")
- GoSub, SendHearts
- AddLog(GiveHearts . " Given")
-
- AddLog("Claiming All")
- GoSub, ClaimAll
-
-
- WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
- ProcSus(PID)
- AddLog("End")
+WinMinimize, %WindowTitle% ahk_class Qt5QWindowIcon
+ProcSus(PID)
+AddLog("End")
 ExitApp ;TsumTsum
 
 
@@ -141,7 +149,6 @@ ClaimAll:
  Loop
  {
 	Sleep, 500
-	AddLog("Looking for Claim All")
 	; Search for Claim All button
 	FindAndClick(350, 565, 360, 575, 0x08ACF0)
 
