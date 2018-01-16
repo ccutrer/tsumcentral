@@ -100,9 +100,9 @@ class Player < ApplicationRecord
 
   def as_json
     next_run = self.next_run
-    timeout = self.timeout
     claim_only = claim_only?
     timeout = 120 if claim_only
+    timeout ||= self.timeout
     {
       name: name,
       next_run: next_run&.utc,
