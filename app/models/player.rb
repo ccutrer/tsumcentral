@@ -64,7 +64,7 @@ class Player < ApplicationRecord
     # still running; don't run again
     return nil if last_runs.last.ended_at.nil?
 
-    contiguous_fails = last_runs.reverse.index { |run| !run.hearts_given.nil? } # this is really the index of the newest success
+    contiguous_fails = last_runs.reverse.index { |run| !run.hearts_given.nil? } || last_runs.length # this is really the index of the newest success
     successful_runs = last_runs.select { |run| run.hearts_given.to_i > 0 }
     heart_claiming_runs = last_runs.select { |run| !run.hearts_given.nil? }
 
@@ -112,7 +112,7 @@ class Player < ApplicationRecord
   end
 
   def kill?
-    @claim_only
+    @kill
   end
 
   def as_json
