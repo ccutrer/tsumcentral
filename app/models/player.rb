@@ -64,6 +64,7 @@ class Player < ApplicationRecord
     # still running; don't run again
     return nil if last_runs.last.ended_at.nil?
 
+    contiguous_fails = last_runs.reverse.index { |run| !run.hearts_given.nil? } # this is really the index of the newest success
     successful_runs = last_runs.select { |run| run.hearts_given.to_i > 0 }
     heart_claiming_runs = last_runs.select { |run| !run.hearts_given.nil? }
 
@@ -83,6 +84,7 @@ class Player < ApplicationRecord
     # nothing? must have been a failure, and then no hearts given. just run again in 10 minutes
     next_run ||= last_runs.last.ended_at + 10.minutes
     @claim_only = next_run == mid_stride_heart_claim
+    @kill = contiguous_fails > 0 && contiguous_fails % 3 == 0
 
     # subject to a temporary pause
     [next_run, paused_until].compact.max
@@ -109,6 +111,10 @@ class Player < ApplicationRecord
     @claim_only
   end
 
+  def kill?
+    @claim_only
+  end
+
   def as_json
     next_run = self.next_run
     claim_only = claim_only?
@@ -119,7 +125,8 @@ class Player < ApplicationRecord
       next_run: next_run&.utc,
       run_now: next_run && next_run <= Time.zone.now,
       timeout: timeout,
-      claim_only: claim_only
+      claim_only: claim_only,
+      kill: kill?
     }
   end
 end
